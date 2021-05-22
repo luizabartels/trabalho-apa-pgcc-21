@@ -38,13 +38,13 @@ def particao (vetor, esquerda, direita, pivo):
 def kesimo(vetor,esquerda,direita,k):
   if esquerda < direita:
     pivo = achaPivo(vetor, esquerda, direita)  
-    p = particao(vetor, esquerda, direita, vetor[pivo-1])
-    if(p > k):
-      kesimo(vetor, esquerda, p , k)
-    elif(p < k):
-      kesimo(vetor, p+1, direita , k)
-  else:
-    return vetor[esquerda]
+    p = particao(vetor, esquerda, direita, vetor[pivo-1]) 
+    
+    if pivo!=0:     
+      if(p >= k):
+        kesimo(vetor, esquerda, p , k)
+      elif(p < k):
+        kesimo(vetor, p+1, direita , k)
 
 
 ###################################
@@ -72,13 +72,24 @@ EixoTempoC = []
 def AjusteQuadratico(x, a, b, c):
 	return a * x * x + b * x + c
 
-for h in range (1, 500):
+for h in range (1, 5000):
 	
-	ListaDecrescente = list(reversed(range(0, h+2)))
+	#ListaDecrescente = list(reversed(range(0, h+2)))
+	ListaCrescente = list(range(0, h+2))
 
 	TempoInicio = time.time()
-	direita = len(ListaDecrescente)-1
-	kesimo(ListaDecrescente,0,direita, (direita)/2)
+	
+	#direita = len(ListaDecrescente)-1
+	#print(ListaDecrescente)
+	#kesimo(ListaDecrescente,0,direita, (direita)/2)
+	#print(ListaDecrescente)
+	
+		
+	direita = len(ListaCrescente)-1 	
+	#print(ListaCrescente)
+	kesimo(ListaCrescente,0,direita, (direita)/2)
+	#print(ListaCrescente)
+	
 	TempoFinal = time.time() - TempoInicio
 
 	EixoTempo.append(TempoFinal)

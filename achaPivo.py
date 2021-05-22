@@ -36,6 +36,7 @@ def particao (vetor, esquerda, direita, pivo):
 
 def quickSort(vetor, esquerda, direita):
   pivo = achaPivo(vetor,esquerda, direita)
+  print(pivo)
   if pivo != 0:
     p = particao(vetor, esquerda, direita, vetor[pivo-1])
     quickSort(vetor, esquerda, p)
@@ -69,10 +70,14 @@ def AjusteQuadratico(x, a, b, c):
 
 for h in range (1, 500):
 	
-	ListaDecrescente = list(reversed(range(0, h+2)))
+	#ListaDecrescente = list(reversed(range(0, h+2)))
+	#print(ListaDecrescente)	
+	#ListaCrescente = list(range(0, h+2))
+	#print(ListaCrescente)	
 
 	TempoInicio = time.time()
 	quickSort(ListaDecrescente,0,len(ListaDecrescente)-1)
+	#quickSort(ListaCrescente,0,len(ListaCrescente)-1)
 	TempoFinal = time.time() - TempoInicio
 
 	EixoTempo.append(TempoFinal)
@@ -102,9 +107,9 @@ y = AjusteQuadratico(x, a, b, c)
 
 plt.xlim(0, xlim)
 plt.ylim(0, max(EixoTempo))
+plt.plot(x, y, '-',  linewidth=5, color='red')
+plt.scatter(EixoNumeroEntradaC, EixoTempoC, color='red')
 plt.scatter(EixoNumeroEntrada, EixoTempo, color='black')
-plt.plot(x, y, '--',  linewidth=5, color='red')
-#plt.scatter(EixoNumeroEntradaC, EixoTempoC, color='red')
 #plt.plot(EixoNumeroEntrada, EixoNN)
 #plt.plot(EixoNumeroEntrada, EixoNLog)
 plt.show()
