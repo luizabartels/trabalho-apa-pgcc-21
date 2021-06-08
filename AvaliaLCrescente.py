@@ -7,15 +7,25 @@ import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 from numpy import arange
 
-def QuickSort(L, L_0 = 0, L_n = None):
+def QuickSortM1(L, L_0 = 0, L_n = None):
 
 	if L_n is None:
 		L_n = len(L) - 1
 
 	if L_0 < L_n:
 		particao = M1 (L, L_0, L_n)
-		QuickSort(L, L_0, particao-1)
-		QuickSort(L, particao+1, L_n)
+		QuickSortM1(L, L_0, particao-1)
+		QuickSortM1(L, particao+1, L_n)
+
+def QuickSortM2(L, L_0 = 0, L_n = None):
+
+	if L_n is None:
+		L_n = len(L) - 1
+
+	if L_0 < L_n:
+		particao = M2 (L, L_0, L_n)
+		QuickSortM2(L, L_0, particao-1)
+		QuickSortM2(L, particao+1, L_n)
 
 #################################
 ### Opções de escolha do pivo ###
@@ -100,6 +110,14 @@ def particao (vetor, esquerda, direita, pivo):
     direita-=1
   return direita
 
+def quickSort(vetor, esquerda, direita):
+  pivo = achaPivo(vetor,esquerda, direita)
+  #print(pivo)
+  if pivo != 0:
+    p = particao(vetor, esquerda, direita, vetor[pivo-1])
+    quickSort(vetor, esquerda, p)
+    quickSort(vetor, p+1, direita)
+
 ##############################################################################
 # 3 - Kesimo																 #
 ##############################################################################
@@ -128,12 +146,13 @@ def EscolheLista(Nivel, IteracaoMax):
 	elif Nivel == "decrescente": # Pior Caso
 		return list(reversed(range(0, IteracaoMax)))
 
-EixoTempoCrescente = []
-EixoTempoSemi = []
-EixoTempoDecrescente = []
+EixoTempoM1 = []
+EixoTempoM2 = []
+EixoTempoAchaPivo = []
+EixoTempoK = []
+
 EixoNumeroEntrada = []
-EixoNN = []
-EixoNLog = []
+
 xlim = 0
 x = []
 
@@ -148,86 +167,76 @@ def AjusteLogaritmico(x, a):
 	return a * numpy.log(a * x)
 
 
-for h in range (1, 2000):
-	EixoNumeroEntrada.append(h)
+for h in range (1, 50000):
+    EixoNumeroEntrada.append(h)
+    ListaCrescente = range(0, h+1) # Melhor caso
+    ListaSemiOrdenada = list(random.sample(range(0, h+1), h)) # Caso médio
+    ListaDecrescente = list(reversed(range(0, h+1))) # Pior caso
 
-	# Melhor caso
-	TempoInicioCrescente = time.time()
-	QuickSort(range(0, h+1))
-	TempoFinalCrescente = time.time() - TempoInicioCrescente
-	EixoTempoCrescente.append(TempoFinalCrescente)
+
+	# Randômico
+    TempoInicioM1 = time.time()
+    QuickSortM1(ListaCrescente)
+    TempoFinalM1 = time.time() - TempoInicioM1
+    EixoTempoM1.append(TempoFinalM1)
 	
-	# Médio caso
-	TempoInicioSemi = time.time()
-	QuickSort(list(random.sample(range(0, h), h-1)))
-	TempoFinalSemi = time.time() - TempoInicioSemi
-	EixoTempoSemi.append(TempoFinalSemi)
+	# Indexado
+    TempoInicioM2 = time.time()
+    QuickSortM2(ListaCrescente)
+    TempoFinalM2 = time.time() - TempoInicioM2
+    EixoTempoM2.append(TempoFinalM2)
 
-	# Pior caso
-	TempoInicioDecrescente = time.time()
-	QuickSort(list(reversed(range(0, h+1))))
-	TempoFinalDecrescente = time.time() - TempoInicioDecrescente
-	EixoTempoDecrescente.append(TempoFinalDecrescente)
+    # AchaPivo
+    TempoInicioAchaPivo = time.time()
+    quickSort(ListaCrescente,0,len(ListaCrescente)-1)
+    TempoFinalAchaPivo = time.time() - TempoInicioAchaPivo
+    EixoTempoAchaPivo.append(TempoFinalAchaPivo)
 
-	xlim = h
+    #Kesimo
+    TempoInicioK = time.time()
+    direita = len(ListaCrescente)-1 	
+    kesimo(ListaCrescente,0,direita, (direita)/2)
+    TempoFinalK = time.time() - TempoInicioK
+    EixoTempoK.append(TempoFinalK)
 
-	
-
-
-poptQuadratico, _ = curve_fit(AjusteQuadratico, EixoNumeroEntrada, EixoTempoDecrescente)
-a = poptQuadratico
-xQuadratico = arange(min(EixoNumeroEntrada), max(EixoNumeroEntrada), 1)
-yQuadratico = AjusteQuadratico(xQuadratico, a)
-
-
-poptLogaritmico, _ = curve_fit(AjusteLogaritmico, EixoNumeroEntrada, EixoTempoCrescente)
-d = poptLogaritmico
-print "d, e, f: ", d
-xLogaritmico = arange(min(EixoNumeroEntrada), max(EixoNumeroEntrada), 1)
-yLogaritmico = AjusteLogaritmico(xLogaritmico, d)
-
-poptLogaritmico1, _ = curve_fit(AjusteLogaritmico, EixoNumeroEntrada, EixoTempoSemi)
-g = poptLogaritmico1
-print "d, e, f: ", g
-xLogaritmico1 = arange(min(EixoNumeroEntrada), max(EixoNumeroEntrada), 1)
-yLogaritmico1 = AjusteLogaritmico(xLogaritmico1, g)
-
+    xlim = h
 
 
 PegaListaMax = []
-PegaListaMax.append(EixoTempoCrescente)
-PegaListaMax.append(EixoTempoSemi)
-PegaListaMax.append(EixoTempoDecrescente)
+PegaListaMax.append(EixoTempoM1)
+PegaListaMax.append(EixoTempoM2)
 EixoMax = []
 EixoMax = max(PegaListaMax, key=max)
 
 plt.xlim(0, xlim)
 plt.ylim(0, max(EixoMax))
-plt.plot(EixoNumeroEntrada, EixoTempoCrescente, color='black')
-#plt.plot(EixoNumeroEntrada, EixoTempoSemi, color='green')
-plt.plot(EixoNumeroEntrada, EixoTempoDecrescente, color='pink')
-plt.plot(xQuadratico, yQuadratico,  linewidth=5, color='red')
-#plt.plot(xLogaritmico, yLogaritmico,  linewidth=5, color='orange')
-#plt.plot(xLogaritmico1, yLogaritmico1,  linewidth=5, color='blue')
+plt.xlabel("Numero de Entradas - n")
+plt.ylabel("Tempo de Execucao - t")
+plt.grid()
+#plt.plot(EixoNumeroEntrada, EixoTempoM1, color='black')
+#plt.plot(EixoNumeroEntrada, EixoTempoM2, color='pink')
+#plt.plot(EixoNumeroEntrada, EixoTempoAchaPivo, color='green')
+#plt.plot(EixoNumeroEntrada, EixoTempoK, color='blue')
 
-# Fit 
-coefficients = numpy.polyfit(EixoNumeroEntrada*numpy.log(EixoNumeroEntrada),EixoTempoCrescente,1) # Use log(x) as the inumpyut to polyfit.
-fit = numpy.poly1d(coefficients) 
+# Fit M1
+coefficientsM1 = numpy.polyfit(EixoNumeroEntrada*numpy.log(EixoNumeroEntrada),EixoTempoM1,1)
+fitM1 = numpy.poly1d(coefficientsM1) 
+# Fit M2
+coefficientsM2 = numpy.polyfit(EixoNumeroEntrada*numpy.log(EixoNumeroEntrada),EixoTempoM2,1)
+fitM2 = numpy.poly1d(coefficientsM2)
+# Fit AchaPivo
+coefficientsAchaPivo = numpy.polyfit(EixoNumeroEntrada*numpy.log(EixoNumeroEntrada),EixoTempoAchaPivo,1)
+fitAchaPivo = numpy.poly1d(coefficientsAchaPivo) 
+# Fit Kesimo
+coefficientsK = numpy.polyfit(EixoNumeroEntrada*numpy.log(EixoNumeroEntrada),EixoTempoK,1)
+fitK = numpy.poly1d(coefficientsK) 
 
-coefficients1 = numpy.polyfit(EixoNumeroEntrada*numpy.log(EixoNumeroEntrada),EixoTempoDecrescente,1)
-fit1 = numpy.poly1d(coefficients1) 
 
-prod = []
+plt.plot(EixoNumeroEntrada,fitM1(EixoNumeroEntrada*numpy.log(EixoNumeroEntrada)), label= 'Randomico')
+plt.plot(EixoNumeroEntrada,fitM2(EixoNumeroEntrada*numpy.log(EixoNumeroEntrada)), label = 'Indexado')
+plt.plot(EixoNumeroEntrada,fitAchaPivo(EixoNumeroEntrada*numpy.log(EixoNumeroEntrada)), label = 'AchaPivo')
+plt.plot(EixoNumeroEntrada,fitK(EixoNumeroEntrada*numpy.log(EixoNumeroEntrada)), label = 'Kesimo')
 
-for i in range(0, len(EixoNumeroEntrada)):
-	prod.append(EixoNumeroEntrada[i]*EixoNumeroEntrada[i])
-
-plt.plot(EixoNumeroEntrada,fit(EixoNumeroEntrada*numpy.log(EixoNumeroEntrada)),"--", label="fit")
-plt.plot(EixoNumeroEntrada,fit(EixoNumeroEntrada*numpy.log(EixoNumeroEntrada)),"--", color = 'red')
-
+plt.title("Melhor Caso - Lista crescente - (Ajuste de curva para nlog(n))")
+plt.legend(loc = "upper left")
 plt.show()
-
-
-
-
-
